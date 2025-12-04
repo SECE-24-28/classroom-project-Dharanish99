@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple TailwindCSS Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen space-y-8">
+
+    <div class="text-center">
+        <h1 class="text-4xl font-bold text-blue-600 mb-4">Welcome to TailwindCSS Page</h1>
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            onclick="alert('Hi!')">Click Me</button>
+    </div>
+
+    <!-- Simple Card Component -->
+    <div class="bg-white p-6 rounded-xl shadow-md w-80 text-center">
+        <h2 class="text-xl font-semibold text-gray-800 mb-2">Simple Card</h2>
+        <p class="text-gray-600 mb-4">This is a small Tailwind card component added below your button.</p>
+        <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+            Action
+        </button>
+    </div>
+
+    <!-- Footer Badge -->
+    <div class="mt-4">
+        <span class="text-sm bg-blue-200 text-blue-700 px-3 py-1 rounded-full">
+            TailwindCSS
+        </span>
+    </div>
+
+</body>
+
+</html>

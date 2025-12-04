@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OtakuView | Anime Gallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e94560;
+            border-radius: 4px;
+        }
+
+        
+        .image-card {
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .anime-img {
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transform-origin: center center;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-card:hover .anime-img {
+            transform: scale(1.15); /* The Zoom Effect */
+        }
+
+        /* Overlay Text on Hover */
+        .overlay {
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .image-card:hover .overlay {
+            opacity: 1;
+        }
+
+        /* Lightbox Animation */
+        .lightbox {
+            animation: fadeIn 0.3s ease-out;
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .lightbox-img {
+            max-height: 90vh;
+            max-width: 90vw;
+            box-shadow: 0 0 25px rgba(233, 69, 96, 0.5);
+            animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Loader */
+        .loader {
+            border-top-color: #e94560;
+            -webkit-animation: spinner 1.5s linear infinite;
+            animation: spinner 1.5s linear infinite;
+        }
+        
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-[#16213e] text-white font-sans min-h-screen">
+
+
+    <nav class="sticky top-0 z-40 bg-[#1a1a2e]/90 backdrop-blur-md border-b border-[#e94560]/20 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-2">
+                    <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#e94560] to-[#ff6b6b]">
+                        Gallery
+                    </h1>
+                </div>
+                <div class="text-sm text-gray-400">
+                    20 Titles
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-extrabold mb-4 text-white tracking-tight">Anime Collection</h2>
+            <p class="text-gray-400 max-w-2xl mx-auto">
+                Explore the most iconic Japanese animation titles. Hover over any card to zoom into the details, or click to view the full theatrical poster.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6" id="gallery-grid">
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#1a1a2e] border-t border-[#e94560]/10 mt-12 py-8">
+        <div class="text-center text-gray-500">
+            <p>Gallery</p>
+        </div>
+    </footer>
+    <div id="lightbox" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/90 lightbox" onclick="closeLightbox()">
+        <button class="absolute top-4 right-4 text-white/70 hover:text-[#e94560] transition-colors p-2" onclick="closeLightbox()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        
+        <div class="relative" onclick="event.stopPropagation()">
+            <img id="lightbox-image" src="" alt="Full View" class="lightbox-img rounded-lg">
+            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent text-center">
+                <h3 id="lightbox-title" class="text-xl font-bold text-white mb-1"></h3>
+                <p class="text-sm text-[#e94560] font-medium">Full Resolution Poster</p>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const animeList = [
+            { title: "Spirited Away", img: "Spirited_Away.jpg" },
+            { title: "Your Name", img: "https://image.tmdb.org/t/p/w500/q719jXXEzOoYaps6babgKnONONX.jpg" },
+            { title: "Attack on Titan", img: "AOT.jpg" },
+            { title: "One Piece", img: "One_Piece.jpg" },
+            { title: "Demon Slayer", img: "https://image.tmdb.org/t/p/w500/nTvM4mhqNlHIvUkI1gVnW6XP7GG.jpg" },
+            { title: "My Neighbor Totoro", img: "my-neighbor-totoro.jpg" },
+            { title: "Princess Mononoke", img: "Princess_Monoke.jpeg" },
+            { title: "Howl's Moving Castle", img: "Howl's_Moving_Castle.jpg" },
+            { title: "Fullmetal Alchemist: BH", img: "FMA_BH.jpg" },
+            { title: "Cowboy Bebop", img: "Cowboy.jpeg" },
+            { title: "Neon Genesis Evangelion", img: "Neon_Genesis_Evangelion.jpg" },
+            { title: "Death Note", img: "Death_Note.jpg" },
+            { title: "Naruto Shippuden", img: "https://image.tmdb.org/t/p/w500/zAYRe2bJxpWTVrwwmBc00VFkAf4.jpg" },
+            { title: "Jujutsu Kaisen", img: "Jujutsu_Kaisen.jpg" },
+            { title: "Chainsaw Man", img: "Chainsaw_man.jpg" },
+            { title: "Hunter x Hunter", img: "Hunter_x_Hunter.jpg" },
+            { title: "Frieren", img: "Frieren.jpg" },
+            { title: "Akira", img: "Akira.jpg" },
+            { title: "Ghost in the Shell", img: "Ghost_in_the_shell.jpeg" },
+            { title: "Dragon Ball Z", img: "Dragon_Ball_Z.jpg" }
+        ];
+
+        // Fallback image in case a URL breaks
+        const FALLBACK_IMAGE = "https://via.placeholder.com/500x750/1a1a2e/e94560?text=Anime+Poster";
+
+        const galleryGrid = document.getElementById('gallery-grid');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-image');
+        const lightboxTitle = document.getElementById('lightbox-title');
+
+        // Render Gallery
+        function renderGallery() {
+            animeList.forEach((anime, index) => {
+                const card = document.createElement('div');
+                card.className = "image-card rounded-xl shadow-lg cursor-pointer bg-[#0f3460] aspect-[2/3] group";
+                card.onclick = () => openLightbox(index);
+
+                card.innerHTML = `
+                    <div class="absolute inset-0 flex items-center justify-center bg-[#0f3460] -z-10">
+                         <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-8 w-8"></div>
+                    </div>
+                    <img 
+                        src="${anime.img}" 
+                        alt="${anime.title}" 
+                        class="anime-img rounded-xl"
+                        loading="lazy"
+                        onerror="this.src='${FALLBACK_IMAGE}'"
+                    >
+                    <div class="overlay absolute inset-0 flex flex-col justify-end p-4 rounded-xl">
+                        <h3 class="text-white font-bold text-lg translate-y-4 group-hover:translate-y-0 transition-transform duration-300">${anime.title}</h3>
+                        <p class="text-[#e94560] text-xs font-semibold uppercase tracking-wider translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">Click to view</p>
+                    </div>
+                `;
+                galleryGrid.appendChild(card);
+            });
+        }
+
+        // Lightbox Functions
+        function openLightbox(index) {
+            const anime = animeList[index];
+            // Use a higher quality image URL pattern if available, here we use the same source but it renders larger
+            lightboxImg.src = anime.img.replace('w500', 'original'); 
+            // Fallback for the HD replace if needed (logic handled by onerror in real apps, here we trust the pattern or browser cache)
+            
+            lightboxTitle.innerText = anime.title;
+            lightbox.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling background
+        }
+
+        function closeLightbox() {
+            lightbox.classList.add('hidden');
+            lightboxImg.src = ''; // Clear source to stop loading
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeLightbox();
+            }
+        });
+
+        // Initialize
+        renderGallery();
+
+    </script>
+</body>
+</html>
